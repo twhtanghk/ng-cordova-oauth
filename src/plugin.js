@@ -56,5 +56,6 @@
 
 angular.module("ngCordovaOauth", [
     "oauth.providers",
-    "oauth.utils"
+    "oauth.utils",
+    "oauth.platform"
 ]);
