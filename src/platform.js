@@ -9340,7 +9340,7 @@ angular.module('oauth.platform', ['ionic', 'ngCordova', 'oauth.utils']).config(f
       toolbar: 'no'
     });
   });
-}).factory('platformService', function($rootScope, $cordovaDevice, $ionicModal, $q, $cordovaOauthUtility) {
+}).factory('platformService', function($rootScope, $cordovaDevice, $ionicModal, $q, $cordovaOauthUtility, $cordovaInAppBrowser) {
   return {
     open: function(url) {
       var deferred;

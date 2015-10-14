@@ -12,7 +12,7 @@ angular.module('oauth.platform', ['ionic', 'ngCordova', 'oauth.utils'])
 				clearcache: 'yes'
 				toolbar: 'no'
 
-	.factory 'platformService', ($rootScope, $cordovaDevice, $ionicModal, $q, $cordovaOauthUtility)->
+	.factory 'platformService', ($rootScope, $cordovaDevice, $ionicModal, $q, $cordovaOauthUtility, $cordovaInAppBrowser) ->
 		
 		open: (url) ->
 			deferred = $q.defer()
