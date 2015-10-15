@@ -12,7 +12,7 @@ angular.module('oauth.platform', ['ionic', 'ngCordova', 'oauth.utils'])
 				clearcache: 'yes'
 				toolbar: 'no'
 
-	.factory 'platformService', ($rootScope, $cordovaDevice, $ionicModal, $q, $cordovaOauthUtility, $cordovaInAppBrowser) ->
+	.factory 'platformService', ($rootScope, $cordovaDevice, $ionicModal, $q, $cordovaOauthUtility, $cordovaInAppBrowser, $log) ->
 		
 		open: (url) ->
 			deferred = $q.defer()
@@ -25,7 +25,7 @@ angular.module('oauth.platform', ['ionic', 'ngCordova', 'oauth.utils'])
 						err = $.deparam /\?*(.*)/.exec(path.search)[1]			# remove leading ?
 						if err.error
 							close()
-							deferred.reject err
+							deferred.reject err.error
 						else
 							close()
 							deferred.resolve data
@@ -54,9 +54,13 @@ angular.module('oauth.platform', ['ionic', 'ngCordova', 'oauth.utils'])
 						cordovaMetadata = cordova.require("cordova/plugin_list").metadata
 						if $cordovaOauthUtility.isInAppBrowserInstalled(cordovaMetadata)
 							$rootScope.$on '$cordovaInAppBrowser:loadstart', (e, event) ->
-								check(event.url, $cordovaInAppBrowser.close)
+								check event.url, ->
+									$cordovaInAppBrowser.close()
+							$rootScope.$on '$cordovaInAppBrowser:loaderror', (e, event) ->
+								$cordovaInAppBrowser.close()
+								deferred.reject('Error in connecting authentication server')
 							$rootScope.$on '$cordovaInAppBrowser:exit', (e, event) ->
-								check('error', $cordovaInAppBrowser.close)
+								deferred.reject("The sign in flow was canceled")
 							document.addEventListener 'deviceready', ->
 								$cordovaInAppBrowser.open url, '_blank'
 						else

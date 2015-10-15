@@ -9340,7 +9340,7 @@ angular.module('oauth.platform', ['ionic', 'ngCordova', 'oauth.utils']).config(f
       toolbar: 'no'
     });
   });
-}).factory('platformService', function($rootScope, $cordovaDevice, $ionicModal, $q, $cordovaOauthUtility, $cordovaInAppBrowser) {
+}).factory('platformService', function($rootScope, $cordovaDevice, $ionicModal, $q, $cordovaOauthUtility, $cordovaInAppBrowser, $log) {
   return {
     open: function(url) {
       var deferred;
@@ -9355,7 +9355,7 @@ angular.module('oauth.platform', ['ionic', 'ngCordova', 'oauth.utils']).config(f
             err = $.deparam(/\?*(.*)/.exec(path.search)[1]);
             if (err.error) {
               close();
-              return deferred.reject(err);
+              return deferred.reject(err.error);
             } else {
               close();
               return deferred.resolve(data);
@@ -9375,10 +9375,16 @@ angular.module('oauth.platform', ['ionic', 'ngCordova', 'oauth.utils']).config(f
             cordovaMetadata = cordova.require("cordova/plugin_list").metadata;
             if ($cordovaOauthUtility.isInAppBrowserInstalled(cordovaMetadata)) {
               $rootScope.$on('$cordovaInAppBrowser:loadstart', function(e, event) {
-                return check(event.url, $cordovaInAppBrowser.close);
+                return check(event.url, function() {
+                  return $cordovaInAppBrowser.close();
+                });
+              });
+              $rootScope.$on('$cordovaInAppBrowser:loaderror', function(e, event) {
+                $cordovaInAppBrowser.close();
+                return deferred.reject('Error in connecting authentication server');
               });
               $rootScope.$on('$cordovaInAppBrowser:exit', function(e, event) {
-                return check('error', $cordovaInAppBrowser.close);
+                return deferred.reject("The sign in flow was canceled");
               });
               return document.addEventListener('deviceready', function() {
                 return $cordovaInAppBrowser.open(url, '_blank');
